@@ -1,7 +1,0 @@
-[package]
-name = "jade_ui"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-jade_core ={path = "../jade_core"}
