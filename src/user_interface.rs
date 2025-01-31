@@ -1,6 +1,11 @@
 #![allow(unused, dead_code)]
 use color_eyre::Result;
-use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+use crossterm::{
+    cursor::Hide,
+    event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers},
+    execute,
+    terminal::EnterAlternateScreen,
+};
 use ratatui::{
     layout::{Constraint, Direction, Layout},
     style::Stylize,
@@ -9,21 +14,20 @@ use ratatui::{
     DefaultTerminal, Frame,
 };
 
-use crate::{logs::Logs, screen::Screen};
+use crate::{
+    logs::{LogLevel, LogMessage, Logs},
+    screen::Screen,
+};
 
 #[derive(Default)]
 pub struct UserInterface {
     running: bool,
-    logs: u8,
+    logs: Logs,
 }
 impl UserInterface {
-    /// Constructor of [`UserInterface`]
-    pub fn new() -> Self {
-        // default of bool is false
-        Self::default()
-    }
     /// Application main loop.
     pub fn run(&mut self, mut terminal: DefaultTerminal) -> Result<()> {
+        terminal.hide_cursor()?;
         self.running = true;
         while self.running {
             // Tell the terminal to refresh its frame.
@@ -36,7 +40,7 @@ impl UserInterface {
         Ok(())
     }
     /// Draw the current `frame` to screen.
-    fn draw(&self, frame: &mut Frame) {
+    fn draw(&mut self, frame: &mut Frame) {
         frame.render_widget(self, frame.area());
     }
     /// Handle the incoming events.
@@ -53,7 +57,6 @@ impl UserInterface {
         match (key.modifiers, key.code) {
             (_, KeyCode::Esc | KeyCode::Char('q'))
             | (KeyModifiers::CONTROL, KeyCode::Char('c') | KeyCode::Char('C')) => self.quit(),
-            // (_, KeyCode::Left) => self.counter -= 1,
             _ => {}
         }
     }
@@ -62,7 +65,7 @@ impl UserInterface {
     }
 }
 // This allows to encapsulate code related to rendering only on one place.
-impl Widget for &UserInterface {
+impl Widget for &mut UserInterface {
     fn render(self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer) {
         // Render the border with instructions.
         let title = Line::from(" Jade ").bold().green().centered();
@@ -87,19 +90,6 @@ impl Widget for &UserInterface {
             )
             .areas(area);
 
-        // Render the footer
-        let [_, logs_space, _] = Layout::new(
-            Direction::Horizontal,
-            // Constraint::from_percentages([1, 98, 1]),
-            [
-                Constraint::Min(1),
-                Constraint::Percentage(98),
-                Constraint::Min(1),
-            ],
-        )
-        .areas(logs_space);
-        // Logs.render(logs_space, buf);
-
         // Render the screen
         let [_, screen_space, _] = Layout::new(
             Direction::Horizontal,
@@ -111,32 +101,45 @@ impl Widget for &UserInterface {
         )
         .areas(screen_space);
         Screen.render(screen_space, buf);
-    }
-}
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use ratatui::{buffer::Buffer, layout::Rect};
-
-    #[test]
-    fn render() {
-        let ui = UserInterface::default();
-        // Creates a square buffer, simulates a square terminal.
-        let mut buf = Buffer::empty(Rect::new(0, 0, 50, 50));
-        // Write the rendered widget to the buffer.
-        ui.render(buf.area, &mut buf);
-        // This is a textual representation of what we expect to see.
-        let mut _expected = Buffer::with_lines(vec![
-            "┏━━━━━━━━━━━━━ Counter App Tutorial ━━━━━━━━━━━━━┓",
-            "┃                    Value: 0                    ┃",
-            "┃                                                ┃",
-            "┗━━━━━━━━━━━ Quit <Q / Ctrl-c / Esc> ━━━━━━━━━━━━┛",
-        ]);
-        todo!()
-    }
-    #[test]
-    fn test_default() {
-        println!("{}", bool::default())
+        // Render the logs
+        let [_, logs_space, _] = Layout::new(
+            Direction::Horizontal,
+            // Constraint::from_percentages([1, 98, 1]),
+            [
+                Constraint::Min(1),
+                Constraint::Percentage(98),
+                Constraint::Min(1),
+            ],
+        )
+        .areas(logs_space);
+        self.logs.append(LogMessage::new(
+            LogLevel::Info,
+            format!(
+                "Screen space area {}, width {}, height {}",
+                screen_space.area(),
+                screen_space.width,
+                screen_space.height,
+            ),
+        ));
+        self.logs.append(LogMessage::new(
+            LogLevel::Info,
+            format!(
+                "Screen Size{}, x {}, y {}",
+                screen_space.as_size(),
+                screen_space.x,
+                screen_space.y
+            ),
+        ));
+        self.logs.append(LogMessage::new(
+            LogLevel::Info,
+            format!(
+                "Area {}, center_x {}, center_y {}",
+                screen_space.area(),
+                screen_space.x + screen_space.width,
+                screen_space.y + screen_space.height
+            ),
+        ));
+        self.logs.render(logs_space, buf);
     }
 }

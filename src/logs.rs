@@ -4,13 +4,13 @@ use ratatui::widgets::{Block, Paragraph, Widget, Wrap};
 
 use crate::circular_buffer::CircularBuffer;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub enum LogLevel {
     Info,
     Warning,
     Error,
 }
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct LogMessage {
     log_level: LogLevel,
     message: String,
@@ -46,7 +46,7 @@ impl<'line> Into<Line<'line>> for &'line LogMessage {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Logs {
     circular_buffer: CircularBuffer<LogMessage>,
 }
@@ -61,7 +61,11 @@ impl Logs {
         self.circular_buffer.len()
     }
 }
-
+impl From<CircularBuffer<LogMessage>> for Logs {
+    fn from(circular_buffer: CircularBuffer<LogMessage>) -> Self {
+        Self { circular_buffer }
+    }
+}
 impl<'line> Into<Text<'line>> for &'line mut Logs {
     fn into(self) -> Text<'line> {
         let mut result = Vec::with_capacity(self.circular_buffer.len());
@@ -85,7 +89,7 @@ impl Widget for &mut Logs {
         ));
 
         Paragraph::new(self)
-            // .wrap(Wrap { trim: false })
+            .wrap(Wrap { trim: false })
             .block(block)
             .render(area, buf);
     }

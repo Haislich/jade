@@ -5,16 +5,14 @@ use jade_tui::{
     circular_buffer::CircularBuffer,
     logs::{LogLevel, LogMessage, Logs},
 };
-use ratatui::text::Text;
 
 fn main() {
     let mut circular_buffer = CircularBuffer::with_capacity(20);
     circular_buffer.append(LogMessage::new(LogLevel::Info, "Questa e' una info"));
     let mut terminal = ratatui::init();
-    let mut logs = Logs::new(circular_buffer);
+    let mut logs = Logs::from(circular_buffer);
     let mut cnt = 0;
     loop {
-        sleep(Duration::from_millis(500));
         logs.append(LogMessage::new(
             LogLevel::Info,
             format!("Questa e' una info,{}", cnt),
@@ -22,10 +20,6 @@ fn main() {
 
         terminal
             .draw(|frame| {
-                // logs.append(LogMessage::new(
-                //     LogLevel::Info,
-                //     format!("Questa e' una info,{}", frame.area()),
-                // ));
                 frame.render_widget(&mut logs, frame.area());
             })
             .unwrap();
@@ -45,6 +39,7 @@ fn main() {
         }
 
         cnt = (cnt + 1) % 10;
+        sleep(Duration::from_millis(500));
     }
 
     ratatui::restore();
