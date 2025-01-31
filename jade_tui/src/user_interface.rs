@@ -78,10 +78,10 @@ impl Widget for &UserInterface {
             // Now we're setting the vertical spacing, as it's the default.
             .constraints(
                 [
-                    Constraint::Percentage(2),
-                    Constraint::Percentage(76), // Screen Space
+                    Constraint::Min(1),
+                    Constraint::Percentage(78), // Screen Space
                     Constraint::Percentage(20), // Logs
-                    Constraint::Percentage(2),
+                    Constraint::Min(1),
                 ], // Empty space
             )
             .areas(area);
@@ -91,9 +91,9 @@ impl Widget for &UserInterface {
             Direction::Horizontal,
             // Constraint::from_percentages([1, 98, 1]),
             [
-                Constraint::Percentage(1),
-                Constraint::Fill(1),
-                Constraint::Percentage(1),
+                Constraint::Min(1),
+                Constraint::Percentage(98),
+                Constraint::Min(1),
             ],
         )
         .areas(logs_space);
@@ -103,9 +103,9 @@ impl Widget for &UserInterface {
         let [_, screen_space, _] = Layout::new(
             Direction::Horizontal,
             [
-                Constraint::Percentage(1),
-                Constraint::Fill(1),
-                Constraint::Percentage(1),
+                Constraint::Min(1),
+                Constraint::Percentage(98),
+                Constraint::Min(1),
             ],
         )
         .areas(screen_space);

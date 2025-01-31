@@ -29,9 +29,14 @@ struct ScreenFrame {
 }
 impl Shape for ScreenFrame {
     fn draw(&self, painter: &mut ratatui::widgets::canvas::Painter) {
-        for x in 0..160 {
-            for y in 0..144 {
-                painter.paint(x, y, Color::Rgb(0, 0, 0));
+        for y in 0..144 {
+            for x in 0..160 {
+                let r = (x as f32 / (159.) * 255.999) as u8;
+                let g = (y as f32 / (143.) * 255.999) as u8;
+                let b = 0;
+
+                painter.paint(x, y, Color::Rgb(r, g, b));
+                // painter.paint(x, y, Color::Rgb(0, 0, 0));
             }
         }
     }
