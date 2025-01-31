@@ -8,7 +8,7 @@ use ratatui::{
     DefaultTerminal, Frame,
 };
 
-use crate::footer::Footer;
+use crate::{logs::Logs, screen::Screen};
 
 #[derive(Default)]
 pub struct UserInterface {
@@ -74,25 +74,42 @@ impl Widget for &UserInterface {
             .title_bottom(instructions.centered())
             .render(area, buf);
 
-        let main_layout = Layout::default()
+        let [_, screen_space, logs_space, _] = Layout::default()
             // Now we're setting the vertical spacing, as it's the default.
             .constraints(
-                vec![
-                    Constraint::Percentage(75), // Screen Space
-                    Constraint::Percentage(22), // Logs
-                    Constraint::Percentage(3),
+                [
+                    Constraint::Percentage(2),
+                    Constraint::Percentage(76), // Screen Space
+                    Constraint::Percentage(20), // Logs
+                    Constraint::Percentage(2),
                 ], // Empty space
             )
-            .split(area);
+            .areas(area);
 
         // Render the footer
-        let footer_layout = Layout::new(
+        let [_, logs_space, _] = Layout::new(
             Direction::Horizontal,
-            Constraint::from_percentages(vec![1, 98, 1]),
+            // Constraint::from_percentages([1, 98, 1]),
+            [
+                Constraint::Percentage(1),
+                Constraint::Fill(1),
+                Constraint::Percentage(1),
+            ],
         )
-        .split(main_layout[1]);
+        .areas(logs_space);
+        Logs.render(logs_space, buf);
 
-        Footer.render(footer_layout[1], buf);
+        // Render the screen
+        let [_, screen_space, _] = Layout::new(
+            Direction::Horizontal,
+            [
+                Constraint::Percentage(1),
+                Constraint::Fill(1),
+                Constraint::Percentage(1),
+            ],
+        )
+        .areas(screen_space);
+        Screen.render(screen_space, buf);
     }
 }
 
