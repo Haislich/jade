@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 use color_eyre::Result;
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use ratatui::{
@@ -13,7 +14,7 @@ use crate::{logs::Logs, screen::Screen};
 #[derive(Default)]
 pub struct UserInterface {
     running: bool,
-    // counter: u8,
+    logs: u8,
 }
 impl UserInterface {
     /// Constructor of [`UserInterface`]
@@ -97,7 +98,7 @@ impl Widget for &UserInterface {
             ],
         )
         .areas(logs_space);
-        Logs.render(logs_space, buf);
+        // Logs.render(logs_space, buf);
 
         // Render the screen
         let [_, screen_space, _] = Layout::new(

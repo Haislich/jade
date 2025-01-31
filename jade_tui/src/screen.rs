@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 use ratatui::{
     style::Color,
     widgets::{
@@ -12,21 +13,21 @@ impl Widget for &Screen {
     where
         Self: Sized,
     {
+        println!("{}, {}", area.height, area.width);
         let frame = Block::bordered()
             .border_type(ratatui::widgets::BorderType::Rounded)
             .title("Asdrubalino");
+        let ratio = area.width / area.height;
         Canvas::default()
             .block(frame)
             .x_bounds([160., 160.])
             .y_bounds([144.; 2])
             .marker(ratatui::symbols::Marker::Block)
-            .paint(|ctx| ctx.draw(&ScreenFrame { data: vec![] }))
+            .paint(|ctx| ctx.draw(&ScreenFrame))
             .render(area, buf);
     }
 }
-struct ScreenFrame {
-    data: Vec<u8>,
-}
+struct ScreenFrame;
 impl Shape for ScreenFrame {
     fn draw(&self, painter: &mut ratatui::widgets::canvas::Painter) {
         for y in 0..144 {
